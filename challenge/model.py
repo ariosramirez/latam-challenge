@@ -23,9 +23,8 @@ logger = logging.getLogger(__name__)
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(ROOT_DIR)
 
-logger.info(
-    f"ROOT_DIR: {ROOT_DIR}",
-)
+MODEL_PATH = f"{ROOT_DIR}/artifacts/model.pkl"
+PREPROCESSOR_PATH = f"{ROOT_DIR}/artifacts/preprocessor.pkl"
 
 
 class DelayModel:
@@ -92,7 +91,7 @@ class DelayModel:
         return min_diff
 
     def preprocess(
-        self, data: pd.DataFrame, target_column: str = None
+        self, data: pd.DataFrame, target_column: str = None, train: bool = True
     ) -> Union[Tuple[pd.DataFrame, pd.DataFrame], pd.DataFrame]:
         """
         Prepare raw data for training or prediction.
@@ -100,6 +99,7 @@ class DelayModel:
         Args:
             data (pd.DataFrame): raw data.
             target_column (str, optional): if set, the target is returned.
+            train(bool, optional): if set to True, the preprocessor is trained.
 
         Returns:
             Tuple[pd.DataFrame, pd.DataFrame]: features and target.
@@ -118,16 +118,35 @@ class DelayModel:
         else:
             features = data
             target = None
+            
 
-        # Apply the preprocessing pipeline
-        logger.info("Applying preprocessing pipeline.")
-        features_transformed = self.preprocessor.fit_transform(features)
+        if train:
+            # Apply the preprocessing pipeline
+            logger.info("Applying preprocessing pipeline.")
+            features_transformed = self.preprocessor.fit_transform(features)
+
+
+            self.save_artifact(self.preprocessor, PREPROCESSOR_PATH)
+            logger.info("Preprocessing fitted successfully.")
+
+        else:
+            logger.info("loading processor")
+            try:
+                self.preprocessor = self.load_artifact(PREPROCESSOR_PATH)
+            except FileNotFoundError as e:
+                logger.error(
+                    f"preprocessor can't be found at {PREPROCESSOR_PATH}"
+                )
+            features_transformed = self.preprocessor.transform(features)
+
+        # Dataset Processing
         self.encoder = (
             self.preprocessor.named_steps["preprocessor"]
             .transformers_[0][1]
             .named_steps["onehot"]
         )
-        feature_names = self.encoder.get_feature_names_out(self.categorical_columns)
+        feature_names = self.encoder.get_feature_names_out(
+            self.categorical_columns)
 
         features_transformed_df = pd.DataFrame(
             features_transformed, columns=feature_names
@@ -153,7 +172,7 @@ class DelayModel:
         """
         logger.info("Fitting the model.")
         self._model.fit(features, target)
-        self.save_artifact(self._model, f"{ROOT_DIR}/artifacts/model.pkl")
+        self.save_artifact(self._model, MODEL_PATH)
         logger.info("Model fitting completed.")
 
     def predict(self, features: pd.DataFrame) -> List[int]:
