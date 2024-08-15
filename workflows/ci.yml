@@ -26,9 +26,6 @@ steps:
             '${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_IMAGE}:$SHORT_SHA']
     id: 'Push the container image to Container Registry'
 
-    logsBucket: 'gs://latam-airlines-ml-challenge_cloudbuild'
-    options:
-      logging: GCS_ONLY
 
 substitutions:
     _LOCATION: us
@@ -37,3 +34,7 @@ substitutions:
 
 images:
   - '${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_IMAGE}:$SHORT_SHA'
+
+logsBucket: 'gs://latam-airlines-ml-challenge_cloudbuild'
+options:
+  logging: GCS_ONLY
