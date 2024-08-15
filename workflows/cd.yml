@@ -24,6 +24,10 @@ steps:
             'us-west1' ]
     id: 'Deploy container image to Cloud Run'
 
+    logsBucket: 'gs://latam-airlines-ml-challenge_cloudbuild'
+    options:
+      logging: GCS_ONLY
+
 
 substitutions:
     _LOCATION: us
@@ -32,6 +36,3 @@ substitutions:
 
 images:
   - '${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_IMAGE}'
-
-options:
-  logging: CLOUD_LOGGING_ONLY
