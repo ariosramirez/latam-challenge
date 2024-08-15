@@ -2,14 +2,16 @@ steps:
   - name: 'gcr.io/cloud-builders/docker'
     args: [ 'build',
             '-t',
-            '${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_IMAGE}:${_SHORT_SHA}',
+            '${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_IMAGE}:$SHORT_SHA',
             '.' ]
     id: 'Build the container image'
 
+
   - name: 'gcr.io/cloud-builders/docker'
     args: [ 'push',
-            '${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_IMAGE}:${_SHORT_SHA}']
+            '${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_IMAGE}:$SHORT_SHA']
     id: 'Push the container image to Container Registry'
+
 
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: gcloud
@@ -17,17 +19,16 @@ steps:
             'deploy',
             'latam-airlines-ml-challenge',
             '--image',
-            '${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_IMAGE}:${_SHORT_SHA}',
+            '${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_IMAGE}:$SHORT_SHA',
             '--region',
             'us-west1' ]
     id: 'Deploy container image to Cloud Run'
+
 
 substitutions:
     _LOCATION: us
     _REPOSITORY: latam-airlines
     _IMAGE: fastapi-ml
-    _SHORT_SHA: latest
-
 
 images:
   - '${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_IMAGE}'

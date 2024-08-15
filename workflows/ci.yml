@@ -1,7 +1,36 @@
-name: 'Continuous Integration'
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [ 'build',
+            '--build-arg',
+            'INSTALL_DEV=true',
+            '-t',
+            '${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_IMAGE}:$SHORT_SHA',
+            '.' ]
+    id: 'Build the container image'
 
-on:
-  ...
 
-jobs:
-  ...
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      ['run', '${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_IMAGE}:$SHORT_SHA', 'make', 'model-test']
+    id: 'test model'
+
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      ['run', '${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_IMAGE}:$SHORT_SHA', 'make', 'api-test']
+    id: 'test api'
+
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [ 'push',
+            '${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_IMAGE}:$SHORT_SHA']
+    id: 'Push the container image to Container Registry'
+
+
+substitutions:
+    _LOCATION: us
+    _REPOSITORY: latam-airlines
+    _IMAGE: fastapi-ml
+
+images:
+  - '${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_IMAGE}:$SHORT_SHA'
