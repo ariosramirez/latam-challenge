@@ -61,3 +61,15 @@ This approach provides a comprehensive solution that balances accuracy, interpre
 
 
 ---
+
+## Part IV: CI/CD Implementation
+
+- **CI Pipeline**: Created a Continuous Integration (CI) pipeline using Cloud Build. This pipeline automatically builds the Docker image with development dependencies and runs model and API tests whenever a PR is created.
+
+- **CD Pipeline Enhancement**: Enhanced the existing Continuous Delivery (CD) pipeline to trigger automatically when a PR is merged into the main branch, deploying the application to Cloud Run.
+
+- **Dockerfile Updates**: Modified the `Dockerfile` to include an optional build argument (`INSTALL_DEV`) for installing development and testing dependencies during the CI process.
+
+- **Cloud Build vs. GitHub Actions**: Chose Cloud Build over GitHub Actions because it simplifies managing GCP resources. The code runs directly in my GCP environment, allowing for easier scaling. This setup is particularly advantageous if I need to deploy on GKE, use GCP Secrets, or handle other GCP-specific integrations.
+
+These changes streamline the development workflow, ensuring that all code changes are thoroughly tested and automatically deployed to production, with the added benefit of seamless GCP resource management.
