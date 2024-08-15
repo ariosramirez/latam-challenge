@@ -19,18 +19,27 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 
+# Define the build argument
+ARG INSTALL_DEV=false
+
 # Copy the requirements file into the container
 COPY requirements.txt /app/requirements.txt
+COPY requirements-dev.txt /app/requirements-dev.txt
+COPY requirements-test.txt /app/requirements-test.txt
 
-# Install the dependencies
+# Install the dependencies based on the build argument
 RUN pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir -r requirements.txt
+    && if [ "$INSTALL_DEV" = "true" ]; then \
+        pip install --no-cache-dir -r requirements.txt -r requirements-dev.txt -r requirements-test.txt; \
+    else \
+        pip install --no-cache-dir -r requirements.txt; \
+    fi
 
 # Copy the rest of the application code into the container
 COPY . /app
 
 # Expose the port FastAPI is going to run on
-EXPOSE 8000
+EXPOSE 8080
 
 # Define the command to run the API
-CMD ["uvicorn", "challenge.api:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "challenge.api:app", "--host", "0.0.0.0", "--port", "8080"]
