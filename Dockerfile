@@ -30,7 +30,7 @@ RUN pip install --no-cache-dir --upgrade pip \
 COPY . /app
 
 # Expose the port FastAPI is going to run on
-EXPOSE 8000
+EXPOSE 8080
 
 # Define the command to run the API
-CMD ["uvicorn", "challenge.api:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "challenge.api:app", "--host", "0.0.0.0", "--port", "8080"]
